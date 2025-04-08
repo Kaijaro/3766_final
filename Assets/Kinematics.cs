@@ -82,15 +82,17 @@ class Kinematics
     public static float3x3 Exp(float3 omega, float theta)
     {
         float3x3 omegaSkew = Skew(omega);
+        float3x3 omegaSkew2 = math.mul(omegaSkew, omegaSkew);
 
-        return float3x3.identity + math.sin(theta) * omegaSkew + (1 - math.cos(theta)) * omegaSkew * omegaSkew;
+        return float3x3.identity + math.sin(theta) * omegaSkew + (1 - math.cos(theta)) * omegaSkew2;
     }
 
     public static float3x3 ExpG(float3 omega, float theta)
     {
         float3x3 omegaSkew = Skew(omega);
+        float3x3 omegaSkew2 = math.mul(omegaSkew, omegaSkew);
 
-        return float3x3.identity * theta + (1 - math.cos(theta)) * omegaSkew + omegaSkew * omegaSkew * (theta - math.sin(theta));
+        return float3x3.identity * theta + (1 - math.cos(theta)) * omegaSkew + omegaSkew2 * (theta - math.sin(theta));
     }
 
     public static float LogTheta(float3x3 mat3)
