@@ -40,13 +40,13 @@ public class ConfigLoader : MonoBehaviour
             m = Kinematics.CreateTransform(rotation, translation);
             mList[i / 3] = new float4x4(m);
 
-            thetaList[i] = math.radians(joint.localEulerAngles.x);
-            thetaList[i + 1] = math.radians(joint.localEulerAngles.y);
+            thetaList[i] = math.radians(joint.localEulerAngles.y);
+            thetaList[i + 1] = math.radians(joint.localEulerAngles.x);
             thetaList[i + 2] = math.radians(joint.localEulerAngles.z);
 
 
-            omegaList[i] = new float3(1, 0, 0);
-            omegaList[i + 1] = new float3(0, 1, 0);
+            omegaList[i] = new float3(0, 1, 0);
+            omegaList[i + 1] = new float3(1, 0, 0);
             omegaList[i + 2] = new float3(0, 0, 1);
 
             vList[i] = math.cross(-omegaList[i], translation);
@@ -58,17 +58,20 @@ public class ConfigLoader : MonoBehaviour
 
     }
 
-    void UpdateJacobian() {
+    void UpdateJacobian()
+    {
         jacobian = new Matrix(6, joints.Length);
         float4x4 currentExponential = float4x4.identity;
-        if (joints.Length > 0) {
-            float[] s1 = {omegaList[0][0], omegaList[0][1], omegaList[0][2], vList[0][0], vList[0][1], vList[0][2]};
+        if (joints.Length > 0)
+        {
+            float[] s1 = { omegaList[0][0], omegaList[0][1], omegaList[0][2], vList[0][0], vList[0][1], vList[0][2] };
             jacobian.SetColumn(s1, 0);
         }
-        for (int i = 1; i < joints.Length; i++) {
-            float4x4 lastExponential = Kinematics.JointV(omegaList[i-1], vList[i-1], thetaList[i-1]);
+        for (int i = 1; i < joints.Length; i++)
+        {
+            float4x4 lastExponential = Kinematics.JointV(omegaList[i - 1], vList[i - 1], thetaList[i - 1]);
             currentExponential = math.mul(currentExponential, lastExponential);
-            float[,] si = {{omegaList[i][0]}, {omegaList[i][1]}, {omegaList[i][2]}, {vList[i][0]}, {vList[i][1]}, {vList[i][2]}};
+            float[,] si = { { omegaList[i][0] }, { omegaList[i][1] }, { omegaList[i][2] }, { vList[i][0] }, { vList[i][1] }, { vList[i][2] } };
             Matrix siMatrix = new Matrix(si);
             Matrix currentJ = Kinematics.Adjoint(currentExponential).MatMul(siMatrix);
             jacobian.SetColumn(currentJ, i);
@@ -91,8 +94,8 @@ public class ConfigLoader : MonoBehaviour
 
             for (int j = 0; j <= i; j++)
             {
-                float4x4 expX = Kinematics.JointV(omegaList[j * 3], vList[j * 3], thetaList[j * 3]);
-                float4x4 expY = Kinematics.JointV(omegaList[j * 3 + 1], vList[j * 3 + 1], thetaList[j * 3 + 1]);
+                float4x4 expY = Kinematics.JointV(omegaList[j * 3], vList[j * 3], thetaList[j * 3]);
+                float4x4 expX = Kinematics.JointV(omegaList[j * 3 + 1], vList[j * 3 + 1], thetaList[j * 3 + 1]);
                 float4x4 expZ = Kinematics.JointV(omegaList[j * 3 + 2], vList[j * 3 + 2], thetaList[j * 3 + 2]);
                 config = math.mul(config, expY);
                 config = math.mul(config, expX);
