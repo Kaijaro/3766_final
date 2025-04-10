@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Unity.Mathematics;
 using UnityEngine;
@@ -15,6 +16,8 @@ public class ConfigLoader : MonoBehaviour
     [SerializeField] float4x4 m;
 
     [SerializeField] string jres = "a\nb";
+
+    Matrix jacobian;
 
     void ProcessJoints()
     {
@@ -55,6 +58,23 @@ public class ConfigLoader : MonoBehaviour
 
     }
 
+    void UpdateJacobian() {
+        jacobian = new Matrix(6, joints.Length);
+        float4x4 currentExponential = float4x4.identity;
+        if (joints.Length > 0) {
+            float[] s1 = {omegaList[0][0], omegaList[0][1], omegaList[0][2], vList[0][0], vList[0][1], vList[0][2]};
+            jacobian.SetColumn(s1, 0);
+        }
+        for (int i = 1; i < joints.Length; i++) {
+            float4x4 lastExponential = Kinematics.JointV(omegaList[i-1], vList[i-1], thetaList[i-1]);
+            currentExponential = math.mul(currentExponential, lastExponential);
+            float[,] si = {{omegaList[i][0]}, {omegaList[i][1]}, {omegaList[i][2]}, {vList[i][0]}, {vList[i][1]}, {vList[i][2]}};
+            Matrix siMatrix = new Matrix(si);
+            Matrix currentJ = Kinematics.Adjoint(currentExponential).MatMul(siMatrix);
+            jacobian.SetColumn(currentJ, i);
+        }
+    }
+
     void OnDrawGizmos()
     {
         // if (update)
@@ -63,6 +83,8 @@ public class ConfigLoader : MonoBehaviour
         //     ProcessJoints();
         // }
         ProcessJoints();
+        UpdateJacobian();
+        jres = jacobian.Data.ToString();
         for (int i = 0; i < mList.Length; i++)
         {
             float4x4 config = float4x4.identity;

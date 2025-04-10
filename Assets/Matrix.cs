@@ -86,4 +86,17 @@ public class Matrix
         }
         return result;
     }
+
+    public void SetColumn(float[] vec, int col) {
+        for (int i = 0; i < Rows; i++) {
+            Data[i,col] = vec[i];
+        }
+    }
+
+    public void SetColumn(Matrix mat, int col) {
+        for (int i = 0; i < Rows; i++) {
+            Data[i,col] = mat[i,0];
+        }
+    }
+
 }
