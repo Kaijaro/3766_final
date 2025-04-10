@@ -1,6 +1,5 @@
 
-using System.Collections.Generic;
-using System.Numerics;
+
 using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -48,12 +47,12 @@ class Kinematics
 
     public static Quaternion ToQuaternion(float3x3 rotation)
     {
-        return Quaternion.CreateFromRotationMatrix(ToMatrix(rotation));
+        return math.normalize(math.quaternion(rotation));
     }
 
     public static Quaternion ToQuaternion(float4x4 transformation)
     {
-        return Quaternion.CreateFromRotationMatrix(ToMatrix(transformation));
+        return math.normalize(math.quaternion(transformation));
     }
 
     public static float Trace(float3x3 so3)
@@ -129,7 +128,6 @@ class Kinematics
         }
     }
 
-    //e^[S]0
     public static float4x4 JointV(float3 omega, float3 v, float theta)
     {
         return CreateTransform(Exp(omega, theta), math.mul(ExpG(omega, theta), v));
@@ -145,34 +143,46 @@ class Kinematics
         return JointV(omega, math.cross(omega, q), theta);
     }
 
-    public static Matrix Adjoint(float4x4 T) {
-        Matrix result = new Matrix(6,6);
+    public static Matrix Adjoint(float4x4 T)
+    {
+        Matrix result = new Matrix(6, 6);
         Matrix R = Matrix.FromFloat3x3(GetRotation(T));
         Matrix skewP = Matrix.FromFloat3x3(Skew(GetTranslation(T)));
         Matrix RP = R.MatMul(skewP);
-        for (int row = 0; row < 6; row++) {
-            for (int col = 0; col < 6; col++) {
-                if (row < 3 && col < 3) {
-                    result[row,col] = R[row,col];;
-                } else if (row < 3 && col >= 3) {
-                    result[row,col] = 0;
-                } else if (row >= 3 && col < 3) {
-                    result[row,col] = RP[row-3, col];
-                } else if (row >= 3 && col >= 3) {
-                    result[row,col] = R[row-3,col-3];
+        for (int row = 0; row < 6; row++)
+        {
+            for (int col = 0; col < 6; col++)
+            {
+                if (row < 3 && col < 3)
+                {
+                    result[row, col] = R[row, col]; ;
+                }
+                else if (row < 3 && col >= 3)
+                {
+                    result[row, col] = 0;
+                }
+                else if (row >= 3 && col < 3)
+                {
+                    result[row, col] = RP[row - 3, col];
+                }
+                else if (row >= 3 && col >= 3)
+                {
+                    result[row, col] = R[row - 3, col - 3];
                 }
             }
         }
         return result;
     }
 
-    public static Matrix FKinSpace(Transform rootJoint) {
-        Transform current = rootJoint;
-        float3 translation = float3.zero;
-        
-        while (current.childCount > 0) {
-            
-        }
-        
-    }
+    // public static Matrix FKinSpace(Transform rootJoint)
+    // {
+    //     Transform current = rootJoint;
+    //     float3 translation = float3.zero;
+
+    //     while (current.childCount > 0)
+    //     {
+
+    //     }
+
+    // }
 }

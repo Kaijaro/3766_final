@@ -119,6 +119,37 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &212566089
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 212566090}
+  m_Layer: 0
+  m_Name: ConfigLoader
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &212566090
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 212566089}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.6597748, y: -0.9137567, z: 2.576119}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &463281146
 GameObject:
   m_ObjectHideFlags: 0
@@ -245,6 +276,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 560a02185e43db54eb0bc9665d672c29, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  omega: {x: 0, y: 1, z: 0}
+  q: {x: 0, y: 0, z: 0}
+  update: 0
+  theta: 0
+  row: 0
+  col: 0
+  output: 0
 --- !u!4 &500418139
 Transform:
   m_ObjectHideFlags: 0
@@ -391,3 +429,4 @@ SceneRoots:
   - {fileID: 463281148}
   - {fileID: 534141877}
   - {fileID: 500418139}
+  - {fileID: 212566090}

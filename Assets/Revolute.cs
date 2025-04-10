@@ -68,22 +68,26 @@ public class Revolute : MonoBehaviour
         Gizmos.color = Color.yellow;
         Gizmos.DrawLine(transform.position, transform.position + Omega);
 
-        if (transform.childCount > 0) {
+        if (transform.childCount > 0)
+        {
             hasChildJoint = true;
             childJointTransform = transform.GetChild(0);
             linkA = transform.position;
             linkB = childJointTransform.position;
         }
-        if (hasChildJoint) {
+        if (hasChildJoint)
+        {
             Gizmos.color = Color.gray;
             Gizmos.DrawLine(linkA, linkB);
             Vector3 q = transform.GetChild(0).position - transform.position;
         }
-        if (transform.parent == null) {
-            if (update) {
+        if (transform.parent == null)
+        {
+            if (update)
+            {
                 update = false;
 
-                Matrix endEffector = Kinematics.FKinBody(transform);
+                // Matrix endEffector = Kinematics.FKinBody(transform);
             }
         }
     }
@@ -92,13 +96,13 @@ public class Revolute : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
-        
+
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 }
