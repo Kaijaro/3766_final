@@ -83,13 +83,7 @@ public class Revolute : MonoBehaviour
             if (update) {
                 update = false;
 
-                float4x4 floatM = Kinematics.CreateTransform(float3x3.identity, q);
-                float4x4 floatB = Kinematics.JointBodyQ(Omega, q, theta);
-                Matrix M = Matrix.FromFloat4x4(floatM);
-                Matrix B = Matrix.FromFloat4x4(floatB);
-                Matrix T = M.MatMul(B);
-                System.Numerics.Quaternion rotation = Kinematics.ToQuaternion(Matrix.ToFloat4x4(T));
-                //childJointTransform.Rotate();
+                Matrix endEffector = Kinematics.FKinBody(transform);
             }
         }
     }

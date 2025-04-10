@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using Unity.Mathematics;
 using Unity.VisualScripting;
+using UnityEngine;
 using UnityEngine.AI;
 using UE = UnityEngine;
 
@@ -165,11 +166,13 @@ class Kinematics
         return result;
     }
 
-    public static Matrix FKinBody(Matrix M, List<Matrix> JointList) {
-        Matrix EndEffector = M;
-        foreach (Matrix joint in JointList) {
-            EndEffector = EndEffector.MatMul(joint);
+    public static Matrix FKinSpace(Transform rootJoint) {
+        Transform current = rootJoint;
+        float3 translation = float3.zero;
+        
+        while (current.childCount > 0) {
+            
         }
-        return EndEffector;
+        
     }
 }
