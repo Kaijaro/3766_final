@@ -1,7 +1,7 @@
 using Unity.Mathematics;
 using UnityEngine;
 
-public class KinematicsTesting : MonoBehaviour
+public class MatrixTesting : MonoBehaviour
 {
     [Header("Input")]
     [SerializeField] float3 omega;
@@ -11,11 +11,8 @@ public class KinematicsTesting : MonoBehaviour
     [SerializeField] bool update = false;
 
     [Header("Output")]
-    [SerializeField] int rows;
-    [SerializeField] int cols;
-    [SerializeField] float element;
-    float3x3 I = float3x3.identity;
-    float3 p  = float3.zero;
+    [SerializeField] Matrix result;
+    Matrix B;
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -29,10 +26,11 @@ public class KinematicsTesting : MonoBehaviour
         if (update)
         {
             update = false;
-
-            rows = Kinematics.Adjoint(Kinematics.CreateTransform(I,p)).Rows;
-            cols = Kinematics.Adjoint(Kinematics.CreateTransform(I,p)).Cols;
-            element = Kinematics.Adjoint(Kinematics.CreateTransform(I,p))[0,1];
+            result = new Matrix(4,3);
+            result.fill(1f);
+            B = new Matrix(3,2);
+            B.fill(2f);
+            result = result.MatMul(B);
 
         }
     }

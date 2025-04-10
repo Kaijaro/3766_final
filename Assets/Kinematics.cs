@@ -1,7 +1,10 @@
 
+using System.Collections.Generic;
 using System.Numerics;
 using Unity.Mathematics;
 using Unity.VisualScripting;
+using UnityEngine.AI;
+using UE = UnityEngine;
 
 
 class Kinematics
@@ -125,6 +128,7 @@ class Kinematics
         }
     }
 
+    //e^[S]0
     public static float4x4 JointV(float3 omega, float3 v, float theta)
     {
         return CreateTransform(Exp(omega, theta), math.mul(ExpG(omega, theta), v));
@@ -140,5 +144,32 @@ class Kinematics
         return JointV(omega, math.cross(omega, q), theta);
     }
 
+    public static Matrix Adjoint(float4x4 T) {
+        Matrix result = new Matrix(6,6);
+        Matrix R = Matrix.FromFloat3x3(GetRotation(T));
+        Matrix skewP = Matrix.FromFloat3x3(Skew(GetTranslation(T)));
+        Matrix RP = R.MatMul(skewP);
+        for (int row = 0; row < 6; row++) {
+            for (int col = 0; col < 6; col++) {
+                if (row < 3 && col < 3) {
+                    result[row,col] = R[row,col];;
+                } else if (row < 3 && col >= 3) {
+                    result[row,col] = 0;
+                } else if (row >= 3 && col < 3) {
+                    result[row,col] = RP[row-3, col];
+                } else if (row >= 3 && col >= 3) {
+                    result[row,col] = R[row-3,col-3];
+                }
+            }
+        }
+        return result;
+    }
 
+    public static Matrix FKinBody(Matrix M, List<Matrix> JointList) {
+        Matrix EndEffector = M;
+        foreach (Matrix joint in JointList) {
+            EndEffector = EndEffector.MatMul(joint);
+        }
+        return EndEffector;
+    }
 }
