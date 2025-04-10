@@ -25,6 +25,15 @@ class Kinematics
         return new float3x3(mat4);
     }
 
+    public static Vector3 ToVector(float3 vec3)
+    {
+        return new Vector3(vec3.x, vec3.y, vec3.z);
+    }
+    public static float3 FromVector(Vector3 vec3)
+    {
+        return new float3(vec3.x, vec3.y, vec3.z);
+    }
+
     public static float3 GetTranslation(float4x4 mat4)
     {
         return new float3(mat4.c3.x, mat4.c3.y, mat4.c3.z);
@@ -100,7 +109,7 @@ class Kinematics
 
     public static float LogTheta(float3x3 mat3)
     {
-        return math.acos((Trace(mat3) - 1) / 2);
+        return math.acos((Trace(mat3) - 1f) / 2f);
     }
 
     public static float3 LogOmega(float3x3 mat3)
