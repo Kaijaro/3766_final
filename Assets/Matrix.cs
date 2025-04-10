@@ -76,4 +76,14 @@ public class Matrix
         }
         return result;
     }
+
+    public static float4x4 ToFloat4x4(Matrix mat) {
+        float4x4 result = new float4x4();
+        for (int row = 0; row < 4; row++) {
+            for (int col = 0; col < 4; col++) {
+                result[row][col] = mat[row,col];
+            }
+        }
+        return result;
+    }
 }

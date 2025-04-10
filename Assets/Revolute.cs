@@ -1,5 +1,6 @@
 
 using System;
+using Unity.Mathematics;
 using UnityEngine;
 
 [Serializable]
@@ -12,7 +13,12 @@ public class Revolute : MonoBehaviour
     private Vector3 linkA;
     private Vector3 linkB;
     private Boolean hasChildJoint;
-    private Boolean isRootJoint;
+    private Boolean isRootJoint = false;
+    [SerializeField] Boolean update = false;
+    [SerializeField] float theta;
+    [SerializeField] int row = 0;
+    [SerializeField] int col = 0;
+    [SerializeField] float output;
 
     public Vector3 Omega
     {
@@ -71,6 +77,20 @@ public class Revolute : MonoBehaviour
         if (hasChildJoint) {
             Gizmos.color = Color.gray;
             Gizmos.DrawLine(linkA, linkB);
+            Vector3 q = transform.GetChild(0).position - transform.position;
+        }
+        if (transform.parent == null) {
+            if (update) {
+                update = false;
+
+                float4x4 floatM = Kinematics.CreateTransform(float3x3.identity, q);
+                float4x4 floatB = Kinematics.JointBodyQ(Omega, q, theta);
+                Matrix M = Matrix.FromFloat4x4(floatM);
+                Matrix B = Matrix.FromFloat4x4(floatB);
+                Matrix T = M.MatMul(B);
+                System.Numerics.Quaternion rotation = Kinematics.ToQuaternion(Matrix.ToFloat4x4(T));
+                //childJointTransform.Rotate();
+            }
         }
     }
 
@@ -78,16 +98,13 @@ public class Revolute : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        if (transform.parent == null) {
-            isRootJoint = true;
-            transform.Rotate(0,90,0);
-        }
+        
         
     }
 
     // Update is called once per frame
     void Update()
     {
-
+        
     }
 }
