@@ -4,6 +4,7 @@ using Unity.Mathematics;
 using UnityEngine;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
+using System.Collections.Generic;
 
 public class ConfigLoader : MonoBehaviour
 {
@@ -60,36 +61,8 @@ public class ConfigLoader : MonoBehaviour
 
     }
 
-    void UpdateJacobian()
-    {
-        jacobian = new Matrix(6, thetaList.Length);
-        float4x4 currentExponential = float4x4.identity;
-        if (thetaList.Length > 0)
-        {
-            float[] s1 = { omegaList[0][0], omegaList[0][1], omegaList[0][2], vList[0][0], vList[0][1], vList[0][2] };
-            jacobian.SetColumn(s1, 0);
-        }
-        for (int i = 1; i < thetaList.Length; i++)
-        {
-            float4x4 lastExponential = Kinematics.JointV(omegaList[i - 1], vList[i - 1], thetaList[i - 1]);
-            currentExponential = math.mul(currentExponential, lastExponential);
-
-            float[,] si = { { omegaList[i][0] }, { omegaList[i][1] }, { omegaList[i][2] }, { vList[i][0] }, { vList[i][1] }, { vList[i][2] } };
-            Matrix siMatrix = new Matrix(si);
-            Matrix adj_e = Kinematics.Adjoint(currentExponential);
-            Matrix currentJ = adj_e.MatMul(siMatrix);
-            jacobian.SetColumn(currentJ, i);
-        }
-    }
-
-    Matrix<float> ComputeJacobianPInv(Matrix jacobian)
-    {
-        Matrix<float> matrix_jacobian = Matrix<float>.Build.DenseOfArray(jacobian.Data);
-        matrix_jacobian.PseudoInverse();
 
 
-        return matrix_jacobian;
-    }
 
     void OnDrawGizmos()
     {
@@ -99,10 +72,12 @@ public class ConfigLoader : MonoBehaviour
         //     ProcessJoints();
         // }
         ProcessJoints();
-        UpdateJacobian();
 
-        ComputeJacobianPInv(jacobian);
+        displayConfig(thetaList);
+    }
 
+    void displayConfig(float[] thetaList)
+    {
         for (int i = 0; i < mList.Length; i++)
         {
             float4x4 config = float4x4.identity;
