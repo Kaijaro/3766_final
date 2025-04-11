@@ -39,13 +39,15 @@ class Kinematics
         return new float3(mat4.c3.x, mat4.c3.y, mat4.c3.z);
     }
 
-     public static float GetMagnitude(float3 vec) {
+    public static float GetMagnitude(float3 vec)
+    {
         float total = 0;
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 3; i++)
+        {
             total = math.square(vec[i]);
         }
         return math.sqrt(total);
-     }
+    }
 
     public static Matrix4x4 ToMatrix(float4x4 mat4)
     {
@@ -117,7 +119,11 @@ class Kinematics
 
     public static float LogTheta(float3x3 mat3)
     {
-        return math.acos((Trace(mat3) - 1f) / 2f);
+        float tr = Trace(mat3);
+        float num = tr - 1f;
+        float theta = math.acos(num / 2f);
+
+        return theta;
     }
 
     public static float3 LogOmega(float3x3 mat3)
@@ -148,6 +154,25 @@ class Kinematics
     public static float4x4 JointV(float3 omega, float3 v, float theta)
     {
         return CreateTransform(Exp(omega, theta), math.mul(ExpG(omega, theta), v));
+    }
+
+    public static float4x4 fkInSpace(float4x4 m, float3[] omegaList, float3[] vList, float[] thetaList)
+    {
+        float4x4 config = float4x4.identity;
+
+        for (int i = 0; i < thetaList.Length; i++)
+        {
+            float4x4 expValue = Kinematics.JointV(omegaList[i], vList[i], thetaList[i]);
+            config = math.mul(config, expValue);
+        }
+
+        return math.mul(config, m);
+    }
+    public static float4x4 TransInverse(float4x4 matrix)
+    {
+        float3x3 rot = math.transpose(GetRotation(matrix));
+
+        return CreateTransform(-rot, math.mul(rot, GetTranslation(matrix)));
     }
 
     public static Matrix<float> SpaceJacobian(float[] thetaList, float3[] omegaList, float3[] vList)
@@ -218,28 +243,33 @@ class Kinematics
     }
 
 
-    public static float3x3 Ginv(float theta, float3 omega) {
+    public static float3x3 Ginv(float theta, float3 omega)
+    {
         float3x3 skew = Skew(omega);
-        float3x3 result = 1f/theta*float3x3.identity - 1f/2f*skew + (1f/theta - 1f/2f*(1f/math.tan(theta/2f)))*math.mul(skew, skew);
+        float3x3 result = 1f / theta * float3x3.identity - 1f / 2f * skew + (1f / theta - 1f / 2f * (1f / math.tan(theta / 2f))) * math.mul(skew, skew);
         return result;
     }
 
-    public static Matrix<float> TransMatrixLog(float4x4 mat) {
+    public static Matrix<float> TransMatrixLog(float4x4 mat)
+    {
         float3x3 R = GetRotation(mat);
         float3 p = GetTranslation(mat);
         float3 v;
         float3 omega;
         float theta;
-        if (R.Equals(float3x3.identity)) {
+        if (R.Equals(float3x3.identity))
+        {
             omega = float3.zero;
-            v = p/GetMagnitude(p);
+            v = p / GetMagnitude(p);
             theta = GetMagnitude(p);
-        } else {
+        }
+        else
+        {
             omega = LogOmega(R);
             theta = LogTheta(R);
-            v = math.mul(Ginv(theta, omega),p);
+            v = math.mul(Ginv(theta, omega), p);
         }
-        float[,] wv = {{omega.x}, {omega.y}, {omega.z}, {v.x}, {v.y}, {v.z}};
+        float[,] wv = { { omega.x }, { omega.y }, { omega.z }, { v.x }, { v.y }, { v.z } };
         Matrix<float> twist = Matrix<float>.Build.DenseOfArray(wv);
         return twist;
     }

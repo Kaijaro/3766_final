@@ -13,16 +13,20 @@ public class ConfigLoader : MonoBehaviour
     [SerializeField] bool update = false;
 
     [SerializeField] float3[] omegaList;
+    public float3[] OmegaList { get { return omegaList; } }
     [SerializeField] float3[] vList;
+    public float3[] VList { get { return vList; } }
     [SerializeField] float[] thetaList;
+    public float[] ThetaList { get { return thetaList; } }
     [SerializeField] float4x4[] mList;
     [SerializeField] float4x4 m;
+    public float4x4 M { get { return m; } }
 
     [SerializeField] string jres = "a\nb";
 
     Matrix jacobian;
 
-    void ProcessJoints()
+    public void ProcessJoints()
     {
         m = Kinematics.CreateTransform(float3x3.identity, float3.zero);
         thetaList = new float[joints.Length * 3];
@@ -75,6 +79,8 @@ public class ConfigLoader : MonoBehaviour
 
         displayConfig(thetaList);
     }
+
+
 
     void displayConfig(float[] thetaList)
     {
