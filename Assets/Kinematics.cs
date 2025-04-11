@@ -4,6 +4,8 @@ using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
 using MathNet.Numerics.LinearAlgebra;
+using System;
+using MathNet.Numerics.Random;
 
 class Kinematics
 {
@@ -36,6 +38,14 @@ class Kinematics
     {
         return new float3(mat4.c3.x, mat4.c3.y, mat4.c3.z);
     }
+
+     public static float GetMagnitude(float3 vec) {
+        float total = 0;
+        for (int i = 0; i < 3; i++) {
+            total = math.square(vec[i]);
+        }
+        return math.sqrt(total);
+     }
 
     public static Matrix4x4 ToMatrix(float4x4 mat4)
     {
@@ -207,15 +217,30 @@ class Kinematics
         return result;
     }
 
-    // public static Matrix FKinSpace(Transform rootJoint)
-    // {
-    //     Transform current = rootJoint;
-    //     float3 translation = float3.zero;
 
-    //     while (current.childCount > 0)
-    //     {
+    public static float3x3 Ginv(float theta, float3 omega) {
+        float3x3 skew = Skew(omega);
+        float3x3 result = 1f/theta*float3x3.identity - 1f/2f*skew + (1f/theta - 1f/2f*(1f/math.tan(theta/2f)))*math.mul(skew, skew);
+        return result;
+    }
 
-    //     }
-
-    // }
+    public static Matrix<float> TransMatrixLog(float4x4 mat) {
+        float3x3 R = GetRotation(mat);
+        float3 p = GetTranslation(mat);
+        float3 v;
+        float3 omega;
+        float theta;
+        if (R.Equals(float3x3.identity)) {
+            omega = float3.zero;
+            v = p/GetMagnitude(p);
+            theta = GetMagnitude(p);
+        } else {
+            omega = LogOmega(R);
+            theta = LogTheta(R);
+            v = math.mul(Ginv(theta, omega),p);
+        }
+        float[,] wv = {{omega.x}, {omega.y}, {omega.z}, {v.x}, {v.y}, {v.z}};
+        Matrix<float> twist = Matrix<float>.Build.DenseOfArray(wv);
+        return twist;
+    }
 }
