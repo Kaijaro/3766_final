@@ -41,10 +41,11 @@ class Kinematics
 
     public static float GetMagnitude(float3 vec)
     {
+
         float total = 0;
         for (int i = 0; i < 3; i++)
         {
-            total = math.square(vec[i]);
+            total += math.square(vec[i]);
         }
         return math.sqrt(total);
     }
@@ -119,6 +120,11 @@ class Kinematics
 
     public static float LogTheta(float3x3 mat3)
     {
+        if (mat3.Equals(float3x3.identity))
+        {
+            return 0;
+        }
+
         float tr = Trace(mat3);
         float num = tr - 1f;
         float theta = math.acos(num / 2f);
@@ -130,7 +136,13 @@ class Kinematics
     {
         float theta = LogTheta(mat3);
 
-        if (Trace(mat3) == -1)
+        if (mat3.Equals(float3x3.identity) || theta == 0)
+        {
+            return float3.zero;
+        }
+
+
+        if (math.max(Trace(mat3), -1) == -1)
         {
             float product = 1 / math.sqrt(2 * (1 + mat3.c1.y));
 
@@ -172,7 +184,7 @@ class Kinematics
     {
         float3x3 rot = math.transpose(GetRotation(matrix));
 
-        return CreateTransform(-rot, math.mul(rot, GetTranslation(matrix)));
+        return CreateTransform(rot, math.mul(-rot, GetTranslation(matrix)));
     }
 
     public static Matrix<float> SpaceJacobian(float[] thetaList, float3[] omegaList, float3[] vList)
@@ -256,17 +268,16 @@ class Kinematics
         float3 p = GetTranslation(mat);
         float3 v;
         float3 omega;
-        float theta;
-        if (R.Equals(float3x3.identity))
+        float theta = LogTheta(R);
+
+        if (R.Equals(float3x3.identity) || theta == 0)
         {
             omega = float3.zero;
             v = p / GetMagnitude(p);
-            theta = GetMagnitude(p);
         }
         else
         {
             omega = LogOmega(R);
-            theta = LogTheta(R);
             v = math.mul(Ginv(theta, omega), p);
         }
         float[,] wv = { { omega.x }, { omega.y }, { omega.z }, { v.x }, { v.y }, { v.z } };
