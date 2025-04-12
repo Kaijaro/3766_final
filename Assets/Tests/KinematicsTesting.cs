@@ -30,9 +30,9 @@ public class KinematicsTesting : MonoBehaviour
         {
             update = false;
 
-            rows = Kinematics.Adjoint(Kinematics.CreateTransform(I,p)).Rows;
-            cols = Kinematics.Adjoint(Kinematics.CreateTransform(I,p)).Cols;
-            element = Kinematics.Adjoint(Kinematics.CreateTransform(I,p))[0,1];
+            // rows = Kinematics.Adjoint(Kinematics.CreateTransform(I,p)).Rows;
+            // cols = Kinematics.Adjoint(Kinematics.CreateTransform(I,p)).Cols;
+            // element = Kinematics.Adjoint(Kinematics.CreateTransform(I,p))[0,1];
 
         }
     }

@@ -242,7 +242,7 @@ class Kinematics
         float3 translation = GetTranslation(T);
         Matrix<float> result = Matrix<float>.Build.Dense(6, 6);
         Matrix<float> R = Matrix<float>.Build.DenseOfColumnArrays(ToJaggedArray(rotation));//FromFloat3x3(GetRotation(T));
-        Matrix<float> skewP = Matrix<float>.Build.DenseOfColumnArrays(ToArray(translation));//.FromFloat3x3(Skew(GetTranslation(T)));
+        Matrix<float> skewP = Matrix<float>.Build.DenseOfColumnArrays(ToJaggedArray(Skew(translation)));//.FromFloat3x3(Skew(GetTranslation(T)));
         //Matrix RP = R.MatMul(skewP);
         Matrix<float> RP = R.Multiply(skewP);
 

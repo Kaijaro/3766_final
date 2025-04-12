@@ -5,7 +5,7 @@ using MathNet.Numerics.LinearAlgebra;
 
 public class KinematicsUnitTest : MonoBehaviour
 {
-    [SerializeField] Boolean run = false;
+    [SerializeField] bool run = false;
     [SerializeField] float3x3 exp;
     private string jointAngles = "";
 
