@@ -24,7 +24,7 @@ public class ConfigLoader : MonoBehaviour
 
     [SerializeField] string jres = "a\nb";
 
-    Matrix jacobian;
+    Matrix<float> jacobian;
 
     public void ProcessJoints()
     {

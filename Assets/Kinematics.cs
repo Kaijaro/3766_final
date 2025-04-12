@@ -50,6 +50,19 @@ class Kinematics
         return math.sqrt(total);
     }
 
+    public static float[] ToArray(float3 f)
+    {
+        return new float[3] {f[0], f[1], f[2]};
+    }
+    public static float[][] ToJaggedArray(float3x3 mat3) 
+    {
+        float[][] jaggedArray = new float[3][];
+        jaggedArray[0] = ToArray(mat3.c0);
+        jaggedArray[1] = ToArray(mat3.c1);;
+        jaggedArray[2] = ToArray(mat3.c2);;
+        return jaggedArray;
+    }
+
     public static Matrix4x4 ToMatrix(float4x4 mat4)
     {
         return mat4.ConvertTo<Matrix4x4>();
@@ -189,13 +202,13 @@ class Kinematics
 
     public static Matrix<float> SpaceJacobian(float[] thetaList, float3[] omegaList, float3[] vList)
     {
-        Matrix jacobian = new(6, thetaList.Length);
+        Matrix<float> jacobian = Matrix<float>.Build.Dense(6, thetaList.Length);
         float4x4 currentExponential = float4x4.identity;
 
         if (thetaList.Length > 0)
         {
             float[] s1 = { omegaList[0][0], omegaList[0][1], omegaList[0][2], vList[0][0], vList[0][1], vList[0][2] };
-            jacobian.SetColumn(s1, 0);
+            jacobian.SetColumn(0, s1);
         }
 
         for (int i = 1; i < thetaList.Length; i++)
@@ -203,14 +216,14 @@ class Kinematics
             float4x4 lastExponential = Kinematics.JointV(omegaList[i - 1], vList[i - 1], thetaList[i - 1]);
             currentExponential = math.mul(currentExponential, lastExponential);
 
-            float[,] si = { { omegaList[i][0] }, { omegaList[i][1] }, { omegaList[i][2] }, { vList[i][0] }, { vList[i][1] }, { vList[i][2] } };
-            Matrix siMatrix = new Matrix(si);
-            Matrix adj_e = Kinematics.Adjoint(currentExponential);
-            Matrix currentJ = adj_e.MatMul(siMatrix);
-            jacobian.SetColumn(currentJ, i);
+            float[] si = { omegaList[i][0], omegaList[i][1], omegaList[i][2], vList[i][0], vList[i][1], vList[i][2] };
+            Matrix<float> siMatrix = Matrix<float>.Build.DenseOfColumnArrays(si);
+            Matrix<float> adj_e = Kinematics.Adjoint(currentExponential);
+            Matrix<float> currentJ = adj_e.Multiply(siMatrix);
+            jacobian.SetColumn(i, currentJ.Column(0));
         }
 
-        return Matrix<float>.Build.DenseOfArray(jacobian.Data);
+        return jacobian;
     }
 
     public static float4x4 JointSpaceQ(float3 omega, float3 q, float theta)
@@ -223,31 +236,34 @@ class Kinematics
         return JointV(omega, math.cross(omega, q), theta);
     }
 
-    public static Matrix Adjoint(float4x4 T)
+    public static Matrix<float> Adjoint(float4x4 T)
     {
-        Matrix result = new Matrix(6, 6);
-        Matrix R = Matrix.FromFloat3x3(GetRotation(T));
-        Matrix skewP = Matrix.FromFloat3x3(Skew(GetTranslation(T)));
-        Matrix RP = R.MatMul(skewP);
-        for (int row = 0; row < 6; row++)
+        float3x3 rotation = GetRotation(T);
+        float3 translation = GetTranslation(T);
+        Matrix<float> result = Matrix<float>.Build.Dense(6, 6);
+        Matrix<float> R = Matrix<float>.Build.DenseOfColumnArrays(ToJaggedArray(rotation));//FromFloat3x3(GetRotation(T));
+        Matrix<float> skewP = Matrix<float>.Build.DenseOfColumnArrays(ToArray(translation));//.FromFloat3x3(Skew(GetTranslation(T)));
+        //Matrix RP = R.MatMul(skewP);
+        Matrix<float> RP = R.Multiply(skewP);
+        for (int col = 0; col < 6; col++)
         {
-            for (int col = 0; col < 6; col++)
+            for (int row = 0; row < 6; row++)
             {
-                if (row < 3 && col < 3)
+                if (col < 3 && row < 3)
                 {
-                    result[row, col] = R[row, col]; ;
+                    result[col, row] = R[col, row]; ;
                 }
-                else if (row < 3 && col >= 3)
+                else if (col < 3 && row >= 3)
                 {
-                    result[row, col] = 0;
+                    result[col, row] = 0;
                 }
-                else if (row >= 3 && col < 3)
+                else if (col >= 3 && row < 3)
                 {
-                    result[row, col] = RP[row - 3, col];
+                    result[col, row] = RP[col - 3, row];
                 }
-                else if (row >= 3 && col >= 3)
+                else if (col >= 3 && row >= 3)
                 {
-                    result[row, col] = R[row - 3, col - 3];
+                    result[col, row] = R[col - 3, row - 3];
                 }
             }
         }

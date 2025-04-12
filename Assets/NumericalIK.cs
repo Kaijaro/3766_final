@@ -18,6 +18,7 @@ public class NumericalIK : MonoBehaviour
     [SerializeField] float3[] omegaList;
     [SerializeField] float3[] vList;
     [SerializeField] float4x4 m;
+    private int i = 0;
 
 
     void IKStep()
@@ -55,6 +56,7 @@ public class NumericalIK : MonoBehaviour
 
         DisplayTransformation(T_sb);
         DisplayTransformation(T_sd);
+        i++;
     }
 
     void OnDrawGizmos()
