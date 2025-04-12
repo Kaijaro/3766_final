@@ -15,7 +15,7 @@ public class KinematicsTesting : MonoBehaviour
     [SerializeField] int cols;
     [SerializeField] float element;
     float3x3 I = float3x3.identity;
-    float3 p  = float3.zero;
+    float3 p = float3.zero;
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created

@@ -12,29 +12,28 @@ public class NumericalIK : MonoBehaviour
     [SerializeField] double currentOmegaError;
     [SerializeField] double currentVError;
     [SerializeField] bool step = false;
+    [SerializeField] bool reset = false;
 
-
-    [SerializeField] float[] thetaList;
-    [SerializeField] float3[] omegaList;
-    [SerializeField] float3[] vList;
-    [SerializeField] float4x4 m;
-    private int i = 0;
-
+    float[] thetaGuess;
 
     void IKStep()
     {
-        // if (thetaList == null || thetaList.Length == 0)
-        // {
-        //     thetaList = config.ThetaList;
-        // }
+        if (thetaGuess == null || thetaGuess.Length == 0)
+        {
+            thetaGuess = config.ThetaList;
+        }
 
+        // good
+        float4x4 T_sb = Kinematics.fkInSpace(config.M, config.OmegaList, config.VList, thetaGuess);
 
-        float4x4 T_sb = Kinematics.fkInSpace(m, omegaList, vList, thetaList);
+        // good
         float4x4 T_bs = Kinematics.TransInverse(T_sb);
         float4x4 T_sd = float4x4.TRS(target.position, target.rotation, 1);
 
+        //good
         float4x4 T_bd = math.mul(T_bs, T_sd);
 
+        //!
         Matrix<float> V = Kinematics.TransMatrixLog(T_bd);
 
         Vector<float> omega = V.Column(0).SubVector(0, 3);
@@ -44,29 +43,33 @@ public class NumericalIK : MonoBehaviour
         currentOmegaError = omega.L2Norm();
         currentVError = v.L2Norm();
 
-        var jacobian = Kinematics.SpaceJacobian(thetaList, omegaList, vList);
+        var jacobian = Kinematics.SpaceJacobian(thetaGuess, config.OmegaList, config.VList);
         var jacobianInverse = jacobian.PseudoInverse();
 
         // Next Guess
         // thetaList + jacobian * V
-        Vector<float> thetaVector = Vector<float>.Build.DenseOfArray(thetaList);
+        Vector<float> thetaVector = Vector<float>.Build.DenseOfArray(thetaGuess);
         var result = jacobianInverse.Multiply(V);
 
-        thetaList = (thetaVector + result.Column(0)).AsArray();
+        if (step)
+        {
+            thetaGuess = (thetaVector + result.Column(0)).AsArray();
+        }
 
         DisplayTransformation(T_sb);
         DisplayTransformation(T_sd);
-        i++;
     }
 
     void OnDrawGizmos()
     {
-        if (!step)
+        if (reset)
         {
-            return;
+            reset = false;
+            thetaGuess = config.ThetaList;
         }
-        step = false;
+
         IKStep();
+        config.DisplayConfig(thetaGuess);
     }
 
     void DisplayTransformation(float4x4 config)

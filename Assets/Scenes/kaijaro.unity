@@ -135,7 +135,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &212566090
 Transform:
   m_ObjectHideFlags: 0
@@ -359,6 +359,186 @@ MonoBehaviour:
       z: 0.897
       w: 1
   jres: 'System.Single[,]'
+--- !u!1 &263026657
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 263026659}
+  - component: {fileID: 263026658}
+  m_Layer: 0
+  m_Name: NemericalIKTester
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!114 &263026658
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 263026657}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b98c675e96c49545bf914bc7bede002, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m:
+    c0:
+      x: 1
+      y: 0
+      z: 0
+      w: 0
+    c1:
+      x: 0
+      y: 1
+      z: 0
+      w: 0
+    c2:
+      x: 0
+      y: 0
+      z: 1
+      w: 0
+    c3:
+      x: 2
+      y: 0
+      z: 0
+      w: 1
+  target:
+    c0:
+      x: -0.5
+      y: 0.866
+      z: 0
+      w: 0
+    c1:
+      x: -0.866
+      y: -0.5
+      z: 0
+      w: 0
+    c2:
+      x: 0
+      y: 0
+      z: 1
+      w: 0
+    c3:
+      x: 0.366
+      y: 1.366
+      z: 0
+      w: 1
+  thetaList:
+  - 0.5235988
+  - 0.7853982
+  - 1.5707964
+  omegaList:
+  - x: 0
+    y: 0
+    z: 1
+  - x: 0
+    y: 0
+    z: 1
+  - x: 0
+    y: 0
+    z: 1
+  vList:
+  - x: 0
+    y: 0
+    z: 0
+  - x: 0
+    y: -1
+    z: 0
+  - x: 0
+    y: -1
+    z: 0
+  nextStep: 0
+  firstStep: 0
+  simulate: 0
+  thetaGuess:
+  - 364.94836
+  - 204.49998
+  - -567.35394
+  currentOmegaError: 0.0000016689424455762492
+  currentVError: 0.00005064602373749949
+  OutFrameSB:
+    c0:
+      x: -0.50000954
+      y: 0.86601985
+      z: 0
+      w: 0
+    c1:
+      x: -0.86601985
+      y: -0.50000954
+      z: 0
+      w: 0
+    c2:
+      x: 0
+      y: 0
+      z: 1
+      w: 0
+    c3:
+      x: 0.36599374
+      y: 1.3660502
+      z: 0
+      w: 1
+  OutFrameBD:
+    c0:
+      x: 0.99997795
+      y: 0.00000166893
+      z: 0
+      w: 0
+    c1:
+      x: -0.00000166893
+      y: 0.99997795
+      z: 0
+      w: 0
+    c2:
+      x: 0
+      y: 0
+      z: 1
+      w: 0
+    c3:
+      x: -0.000046670437
+      y: 0.000019669533
+      z: 0
+      w: 1
+  OutV: "DenseMatrix 6x1-Single\r\n           0\r\n           0\r\n 1.66894E-06\r\n-4.66704E-05\r\n
+    1.96696E-05\r\n           0\r\n"
+  OutJacobian: 'DenseMatrix 6x3-Single
+
+    0          0         0
+
+    0         
+    0         0
+
+    1          1         1
+
+    0   0.500015  -2.70312
+
+    0 
+    -0.866017  0.838006
+
+    0          0         0
+
+'
+--- !u!4 &263026659
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 263026657}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &383193457
 GameObject:
   m_ObjectHideFlags: 0
@@ -790,6 +970,10 @@ MonoBehaviour:
   target: {fileID: 1795813941}
   errorOmega: 0.001
   errorV: 0.0001
+  currentOmegaError: 0
+  currentVError: 0
+  step: 1
+  reset: 0
 --- !u!4 &1412913944
 Transform:
   m_ObjectHideFlags: 0
@@ -848,3 +1032,4 @@ SceneRoots:
   - {fileID: 991742822}
   - {fileID: 1795813941}
   - {fileID: 1412913944}
+  - {fileID: 263026659}

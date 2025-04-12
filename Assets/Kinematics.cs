@@ -52,14 +52,14 @@ class Kinematics
 
     public static float[] ToArray(float3 f)
     {
-        return new float[3] {f[0], f[1], f[2]};
+        return new float[3] { f[0], f[1], f[2] };
     }
-    public static float[][] ToJaggedArray(float3x3 mat3) 
+    public static float[][] ToJaggedArray(float3x3 mat3)
     {
         float[][] jaggedArray = new float[3][];
         jaggedArray[0] = ToArray(mat3.c0);
-        jaggedArray[1] = ToArray(mat3.c1);;
-        jaggedArray[2] = ToArray(mat3.c2);;
+        jaggedArray[1] = ToArray(mat3.c1); ;
+        jaggedArray[2] = ToArray(mat3.c2); ;
         return jaggedArray;
     }
 
@@ -213,12 +213,12 @@ class Kinematics
 
         for (int i = 1; i < thetaList.Length; i++)
         {
-            float4x4 lastExponential = Kinematics.JointV(omegaList[i - 1], vList[i - 1], thetaList[i - 1]);
+            float4x4 lastExponential = JointV(omegaList[i - 1], vList[i - 1], thetaList[i - 1]);
             currentExponential = math.mul(currentExponential, lastExponential);
 
             float[] si = { omegaList[i][0], omegaList[i][1], omegaList[i][2], vList[i][0], vList[i][1], vList[i][2] };
             Matrix<float> siMatrix = Matrix<float>.Build.DenseOfColumnArrays(si);
-            Matrix<float> adj_e = Kinematics.Adjoint(currentExponential);
+            Matrix<float> adj_e = Adjoint(currentExponential);
             Matrix<float> currentJ = adj_e.Multiply(siMatrix);
             jacobian.SetColumn(i, currentJ.Column(0));
         }
@@ -280,7 +280,7 @@ class Kinematics
             v = math.mul(Ginv(theta, omega), p);
         }
         float[,] wv = { { omega.x }, { omega.y }, { omega.z }, { v.x }, { v.y }, { v.z } };
-        Matrix<float> twist = Matrix<float>.Build.DenseOfArray(wv);
+        Matrix<float> twist = Matrix<float>.Build.DenseOfArray(wv).Multiply(theta);
         return twist;
     }
 }

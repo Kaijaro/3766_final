@@ -26,6 +26,8 @@ public class ConfigLoader : MonoBehaviour
 
     Matrix<float> jacobian;
 
+
+
     public void ProcessJoints()
     {
         m = Kinematics.CreateTransform(float3x3.identity, float3.zero);
@@ -77,12 +79,12 @@ public class ConfigLoader : MonoBehaviour
         // }
         ProcessJoints();
 
-        displayConfig(thetaList);
+
     }
 
 
 
-    void displayConfig(float[] thetaList)
+    public void DisplayConfig(float[] thetaList)
     {
         for (int i = 0; i < mList.Length; i++)
         {
