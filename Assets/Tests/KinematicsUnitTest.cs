@@ -34,6 +34,7 @@ public class KinematicsUnitTest : MonoBehaviour
             exp = Kinematics.Exp(omega, theta);
             Matrix<float> adj = Kinematics.Adjoint(transform);
 
+            Console.WriteLine("");
             Debug.Log("");
 
         }

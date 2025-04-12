@@ -251,19 +251,19 @@ class Kinematics
             {
                 if (col < 3 && row < 3)
                 {
-                    result[col, row] = R[col, row]; ;
+                    result[row, col] = R[row, col]; ;
                 }
-                else if (col < 3 && row >= 3)
+                else if (row < 3 && col >= 3)
                 {
-                    result[col, row] = 0;
+                    result[row, col] = 0;
                 }
-                else if (col >= 3 && row < 3)
+                else if (row >= 3 && col < 3)
                 {
-                    result[col, row] = RP[col - 3, row];
+                    result[row, col] = RP[row - 3, col];
                 }
-                else if (col >= 3 && row >= 3)
+                else if (row >= 3 && col >= 3)
                 {
-                    result[col, row] = R[col - 3, row - 3];
+                    result[row, col] = R[row - 3, col - 3];
                 }
             }
         }
