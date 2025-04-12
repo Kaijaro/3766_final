@@ -25,14 +25,13 @@ public class KinematicsUnitTest : MonoBehaviour
 
 
             float4x4 transform = Kinematics.CreateTransform(rotation, translation);
-            float3x3 extractedRotation = Kinematics.GetRotation(transform);
-            float3 extractedtranslation = Kinematics.GetTranslation(transform);
-            float trace = Kinematics.Trace(rotation);
-            float magnitudeCol1 = Kinematics.GetMagnitude(new float3(rotation.c0[0], rotation.c1[0], rotation.c2[0]));
-            Quaternion rotationToQuaternion = Kinematics.ToQuaternion(rotation);
+            //float trace = Kinematics.Trace(rotation);
+            //float magnitudeCol1 = Kinematics.GetMagnitude(new float3(rotation.c0[0], rotation.c1[0], rotation.c2[0]));
+            //Quaternion rotationToQuaternion = Kinematics.ToQuaternion(rotation);
             float3x3 skew = Kinematics.Skew(new float3(1f,2f,3f));
             exp = Kinematics.Exp(omega, theta);
             Matrix<float> adj = Kinematics.Adjoint(transform);
+            
 
             Console.WriteLine("");
             Debug.Log("");

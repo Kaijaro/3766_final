@@ -245,28 +245,11 @@ class Kinematics
         Matrix<float> skewP = Matrix<float>.Build.DenseOfColumnArrays(ToArray(translation));//.FromFloat3x3(Skew(GetTranslation(T)));
         //Matrix RP = R.MatMul(skewP);
         Matrix<float> RP = R.Multiply(skewP);
-        for (int col = 0; col < 6; col++)
-        {
-            for (int row = 0; row < 6; row++)
-            {
-                if (col < 3 && row < 3)
-                {
-                    result[row, col] = R[row, col]; ;
-                }
-                else if (row < 3 && col >= 3)
-                {
-                    result[row, col] = 0;
-                }
-                else if (row >= 3 && col < 3)
-                {
-                    result[row, col] = RP[row - 3, col];
-                }
-                else if (row >= 3 && col >= 3)
-                {
-                    result[row, col] = R[row - 3, col - 3];
-                }
-            }
-        }
+
+        result.SetSubMatrix(0, 0, R);
+        result.SetSubMatrix(3, 0, RP);
+        result.SetSubMatrix(3, 3, R);
+
         return result;
     }
 
