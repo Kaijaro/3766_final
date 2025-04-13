@@ -128,7 +128,7 @@ class Kinematics
         float3x3 omegaSkew = Skew(omega);
         float3x3 omegaSkew2 = math.mul(omegaSkew, omegaSkew);
 
-        return float3x3.identity * theta + (1 - math.cos(theta)) * omegaSkew + omegaSkew2 * (theta - math.sin(theta));
+        return float3x3.identity * theta + (1 - math.cos(theta)) * omegaSkew + (theta - math.sin(theta)) * omegaSkew2;
     }
 
     public static float LogTheta(float3x3 mat3)
