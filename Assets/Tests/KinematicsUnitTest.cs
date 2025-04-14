@@ -31,6 +31,9 @@ public class KinematicsUnitTest : MonoBehaviour
             float3x3 skew = Kinematics.Skew(new float3(1f,2f,3f));
             exp = Kinematics.Exp(omega, theta);
             Matrix<float> adj = Kinematics.Adjoint(transform);
+            float3x3 ginv = Kinematics.Ginv(theta, omega);
+            float3 v = math.mul(Kinematics.Ginv(theta, omega), new float3(1f, 1f, 1f));
+            Matrix<float> V = Kinematics.TransMatrixLog(transform);
             
 
             Console.WriteLine("");

@@ -878,8 +878,8 @@ MonoBehaviour:
   target: {fileID: 749148848}
   errorOmega: 0.001
   errorV: 0.0001
-  currentOmegaError: 1.3880112171173096
-  currentVError: 0.536992073059082
+  currentOmegaError: 1.1275490522384644
+  currentVError: 0.518004834651947
   step: 0
   reset: 0
 --- !u!4 &843567816

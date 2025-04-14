@@ -257,8 +257,32 @@ class Kinematics
     public static float3x3 Ginv(float theta, float3 omega)
     {
         float3x3 skew = Skew(omega);
-        float3x3 result = 1f / theta * float3x3.identity - 1f / 2f * skew + (1f / theta - 1f / 2f * (1f / math.tan(theta / 2f))) * math.mul(skew, skew);
+        float3x3 result = (1f / theta * float3x3.identity) - (1f / 2f * skew) + (1f / theta - 1f / 2f * (1f / math.tan(theta / 2f))) * math.mul(skew, skew);
         return result;
+    }
+
+    public static bool NearZero(float f)
+    {
+        return f < 0.001 && f > -0.001;
+    }
+
+    public static bool NearZero(float3 vec3) {
+        return GetMagnitude(vec3) < 0.001;
+    }
+
+    public static bool NearIdentity(float3x3 mat3)
+    {
+        for (int col = 0; col < 3; col++) {
+            for (int row = 0; row < 3; row++)
+            {
+                if (col == row) {
+                    if (!NearZero(math.abs(mat3[row][col]) - 1)) return false;
+                } else {
+                    if (!NearZero(mat3[row][col])) return false;
+                }
+            }
+        }
+        return true;
     }
 
     public static Matrix<float> TransMatrixLog(float4x4 mat)
@@ -269,13 +293,15 @@ class Kinematics
         float3 omega;
         float theta = LogTheta(R);
 
-        if (R.Equals(float3x3.identity) || theta == 0)
+        if (NearIdentity(R))
         {
+            theta = GetMagnitude(p);
             omega = float3.zero;
             v = p / GetMagnitude(p);
         }
         else
         {
+            theta = LogTheta(R);
             omega = LogOmega(R);
             v = math.mul(Ginv(theta, omega), p);
         }
