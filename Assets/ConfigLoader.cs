@@ -100,21 +100,46 @@ public class ConfigLoader : MonoBehaviour
                 config = math.mul(config, expZ);
 
             }
-            config = math.mul(config, mList[i]);
 
+            config = math.mul(config, mList[i]);
             Vector3 pos = Kinematics.ToVector(Kinematics.GetTranslation(config));
-            float3x3 rot = Kinematics.GetRotation(config);
-            Vector3 rotX = Kinematics.ToVector(rot.c0);
-            Vector3 rotY = Kinematics.ToVector(rot.c1);
-            Vector3 rotZ = Kinematics.ToVector(rot.c2);
-            Gizmos.color = Color.white;
-            Gizmos.DrawSphere(pos, .05f);
-            Gizmos.color = Color.red;
-            Gizmos.DrawLine(pos, pos + rotX);
-            Gizmos.color = Color.green;
-            Gizmos.DrawLine(pos, pos + rotY);
-            Gizmos.color = Color.blue;
-            Gizmos.DrawLine(pos, pos + rotZ);
+
+            if (i > 0)
+            {
+                float4x4 lastPosConfig = float4x4.identity;
+
+                for (int j = 0; j <= i - 1; j++)
+                {
+                    float4x4 expY = Kinematics.JointV(omegaList[j * 3], vList[j * 3], thetaList[j * 3]);
+                    float4x4 expX = Kinematics.JointV(omegaList[j * 3 + 1], vList[j * 3 + 1], thetaList[j * 3 + 1]);
+                    float4x4 expZ = Kinematics.JointV(omegaList[j * 3 + 2], vList[j * 3 + 2], thetaList[j * 3 + 2]);
+                    lastPosConfig = math.mul(lastPosConfig, expY);
+                    lastPosConfig = math.mul(lastPosConfig, expX);
+                    lastPosConfig = math.mul(lastPosConfig, expZ);
+                }
+
+                Gizmos.color = Color.HSVToRGB((i - 1f) / (mList.Length - 1f), .35f, 1f);
+                Vector3 lastPos = Kinematics.ToVector(Kinematics.GetTranslation(math.mul(lastPosConfig, mList[i - 1])));
+
+                Gizmos.DrawLine(lastPos, pos);
+            }
+
+            if (i >= mList.Length - 1)
+            {
+                float3x3 rot = Kinematics.GetRotation(config);
+                Vector3 rotX = Kinematics.ToVector(rot.c0);
+                Vector3 rotY = Kinematics.ToVector(rot.c1);
+                Vector3 rotZ = Kinematics.ToVector(rot.c2);
+                Gizmos.color = Color.white;
+                Gizmos.DrawSphere(pos, .05f);
+                Gizmos.color = Color.red;
+                Gizmos.DrawLine(pos, pos + rotX);
+                Gizmos.color = Color.green;
+                Gizmos.DrawLine(pos, pos + rotY);
+                Gizmos.color = Color.blue;
+                Gizmos.DrawLine(pos, pos + rotZ);
+            }
+
         }
     }
 

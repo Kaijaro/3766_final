@@ -28,7 +28,9 @@ public class NIKTester : MonoBehaviour
     [SerializeField] string OutVs;
     [SerializeField] string OutAdjVsb;
     [SerializeField] string OutJacobian;
-
+    [SerializeField] string OutJacobianInv;
+    [SerializeField] string OutJacobianStep;
+    Matrix<float> JacobianStep;
     void IKCalcValues()
     {
         if (thetaGuess == null || thetaGuess.Length == 0)
@@ -36,25 +38,28 @@ public class NIKTester : MonoBehaviour
             thetaGuess = (float[])thetaList.Clone();
         }
 
-        // Tsb = myFKinSpace(M,Slist, thetalist)
+
         OutFrameSB = Kinematics.fkInSpace(m, omegaList, vList, thetaGuess);
-
-        // Tbs = mr.TransInv(Tsb)
         OutFrameBS = Kinematics.TransInverse(OutFrameSB);
-
-        // Tbd = np.dot(Tbs, T)
         OutFrameBD = math.mul(OutFrameBS, target);
 
-        // Vbd = mr.se3ToVec(mr.MatrixLog6(Tbd))
         Matrix<float> Vbd = Kinematics.TransMatrixLog(OutFrameBD);
         OutVbd = Vbd.ToString();
 
-        // Vs = np.dot(mr.Adjoint(Tsb), Vbd)
         Matrix<float> AdjVsb = Kinematics.Adjoint(OutFrameSB);
         OutAdjVsb = AdjVsb.ToString();
 
         Matrix<float> Vs = AdjVsb.Multiply(Vbd);
         OutVs = Vs.ToString();
+
+        Matrix<float> jacobian = Kinematics.SpaceJacobian(thetaGuess, omegaList, vList);
+        OutJacobian = jacobian.ToString();
+
+        Matrix<float> jacobianInv = jacobian.PseudoInverse();
+        OutJacobianInv = jacobianInv.ToString();
+
+        JacobianStep = jacobianInv.Multiply(Vs);
+        OutJacobianStep = JacobianStep.ToString();
     }
 
     void IKStep()
@@ -104,7 +109,9 @@ public class NIKTester : MonoBehaviour
         if (nextStep)
         {
             nextStep = false;
-            IKStep();
+            Vector<float> thetaVector = Vector<float>.Build.DenseOfArray(thetaGuess);
+            thetaGuess = (thetaVector + JacobianStep.Column(0)).AsArray();
+            IKCalcValues();
         }
 
         if (firstStep)
@@ -116,10 +123,10 @@ public class NIKTester : MonoBehaviour
 
         if (simulate)
         {
-            IKStep();
+            Vector<float> thetaVector = Vector<float>.Build.DenseOfArray(thetaGuess);
+            thetaGuess = (thetaVector + JacobianStep.Column(0)).AsArray();
+            IKCalcValues();
         }
-
-
     }
 
     void DisplayTransformation(float4x4 config)

@@ -1,5 +1,6 @@
 using MathNet.Numerics.LinearAlgebra;
 using Unity.Mathematics;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class NumericalIK : MonoBehaviour
@@ -14,50 +15,48 @@ public class NumericalIK : MonoBehaviour
     [SerializeField] bool step = false;
     [SerializeField] bool reset = false;
 
+    Matrix<float> JacobianStep;
     float[] thetaGuess;
 
-    void IKStep()
+    void NextValues()
     {
         if (thetaGuess == null || thetaGuess.Length == 0)
         {
-            thetaGuess = config.ThetaList;
+            thetaGuess = (float[])config.ThetaList.Clone();
         }
+        float4x4 T = float4x4.TRS(target.position, target.rotation, target.lossyScale);
+        float4x4 Tsb = Kinematics.fkInSpace(config.M, config.OmegaList, config.VList, thetaGuess);
+        float4x4 Tbs = Kinematics.TransInverse(Tsb);
+        float4x4 Tbd = math.mul(Tbs, T);
 
-        // good
-        float4x4 T_sb = Kinematics.fkInSpace(config.M, config.OmegaList, config.VList, thetaGuess);
+        Matrix<float> Vbd = Kinematics.TransMatrixLog(Tbd);
+        Matrix<float> AdjVsb = Kinematics.Adjoint(Tsb);
 
-        // good
-        float4x4 T_bs = Kinematics.TransInverse(T_sb);
-        float4x4 T_sd = float4x4.TRS(target.position, target.rotation, 1);
+        Matrix<float> Vs = AdjVsb.Multiply(Vbd);
+        Matrix<float> jacobian = Kinematics.SpaceJacobian(thetaGuess, config.OmegaList, config.VList);
+        Matrix<float> jacobianInv = jacobian.PseudoInverse();
 
-        //good
-        float4x4 T_bd = math.mul(T_bs, T_sd);
+        JacobianStep = jacobianInv.Multiply(Vs);
 
-        //!
-        Matrix<float> V = Kinematics.TransMatrixLog(T_bd);
-
-        Vector<float> omega = V.Column(0).SubVector(0, 3);
-        Vector<float> v = V.Column(0).SubVector(3, 3);
-
-        // Error of ||V.w|| and ||V.v|| 
+        Vector<float> omega = Vs.Column(0).SubVector(0, 3);
+        Vector<float> v = Vs.Column(0).SubVector(3, 3);
         currentOmegaError = omega.L2Norm();
         currentVError = v.L2Norm();
+    }
 
-        var jacobian = Kinematics.SpaceJacobian(thetaGuess, config.OmegaList, config.VList);
-        var jacobianInverse = jacobian.PseudoInverse();
+    float[] IK()
+    {
+        NextValues();
 
-        // Next Guess
-        // thetaList + jacobian * V
-        Vector<float> thetaVector = Vector<float>.Build.DenseOfArray(thetaGuess);
-        var result = jacobianInverse.Multiply(V);
-
-        if (step)
+        int i = 0;
+        while ((i++ < 20) && (currentOmegaError > errorOmega || currentVError > errorV))
         {
-            thetaGuess = (thetaVector + result.Column(0)).AsArray();
+            Vector<float> thetaVector = Vector<float>.Build.DenseOfArray(thetaGuess);
+            thetaGuess = (thetaVector + JacobianStep.Column(0)).AsArray();
+            NextValues();
         }
 
-        DisplayTransformation(T_sb);
-        DisplayTransformation(T_sd);
+        return thetaGuess;
     }
 
     void OnDrawGizmos()
@@ -67,9 +66,13 @@ public class NumericalIK : MonoBehaviour
             reset = false;
             thetaGuess = config.ThetaList;
         }
+        if (step)
+        {
+            float[] guess = IK();
 
-        IKStep();
+        }
         config.DisplayConfig(thetaGuess);
+
     }
 
     void DisplayTransformation(float4x4 config)
@@ -93,8 +96,7 @@ public class NumericalIK : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        config.ProcessJoints();
-        IKStep();
+
     }
 
     // Update is called once per frame
