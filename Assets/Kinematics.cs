@@ -15,8 +15,6 @@ class Kinematics
     {
         float4x4 matrix = new float4x4(rotation, translation);
 
-
-
         return matrix;
     }
 
@@ -241,10 +239,9 @@ class Kinematics
         float3x3 rotation = GetRotation(T);
         float3 translation = GetTranslation(T);
         Matrix<float> result = Matrix<float>.Build.Dense(6, 6);
-        Matrix<float> R = Matrix<float>.Build.DenseOfColumnArrays(ToJaggedArray(rotation));//FromFloat3x3(GetRotation(T));
-        Matrix<float> skewP = Matrix<float>.Build.DenseOfColumnArrays(ToJaggedArray(Skew(translation)));//.FromFloat3x3(Skew(GetTranslation(T)));
-        //Matrix RP = R.MatMul(skewP);
-        Matrix<float> RP = R.Multiply(skewP);
+        Matrix<float> R = Matrix<float>.Build.DenseOfColumnArrays(ToJaggedArray(rotation));
+        Matrix<float> skewP = Matrix<float>.Build.DenseOfColumnArrays(ToJaggedArray(Skew(translation)));
+        Matrix<float> RP = skewP.Multiply(R);
 
         result.SetSubMatrix(0, 0, R);
         result.SetSubMatrix(3, 0, RP);
@@ -266,18 +263,23 @@ class Kinematics
         return f < 0.001 && f > -0.001;
     }
 
-    public static bool NearZero(float3 vec3) {
+    public static bool NearZero(float3 vec3)
+    {
         return GetMagnitude(vec3) < 0.001;
     }
 
     public static bool NearIdentity(float3x3 mat3)
     {
-        for (int col = 0; col < 3; col++) {
+        for (int col = 0; col < 3; col++)
+        {
             for (int row = 0; row < 3; row++)
             {
-                if (col == row) {
+                if (col == row)
+                {
                     if (!NearZero(math.abs(mat3[row][col]) - 1)) return false;
-                } else {
+                }
+                else
+                {
                     if (!NearZero(mat3[row][col])) return false;
                 }
             }

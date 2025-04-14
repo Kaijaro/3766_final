@@ -1,5 +1,6 @@
 using MathNet.Numerics.LinearAlgebra;
 using Unity.Mathematics;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class NIKTester : MonoBehaviour
@@ -21,51 +22,79 @@ public class NIKTester : MonoBehaviour
     [SerializeField] double currentOmegaError;
     [SerializeField] double currentVError;
     [SerializeField] float4x4 OutFrameSB;
+    [SerializeField] float4x4 OutFrameBS;
     [SerializeField] float4x4 OutFrameBD;
-    [SerializeField] string OutV;
+    [SerializeField] string OutVbd;
+    [SerializeField] string OutVs;
+    [SerializeField] string OutAdjVsb;
     [SerializeField] string OutJacobian;
 
-
-    void IKStep()
+    void IKCalcValues()
     {
         if (thetaGuess == null || thetaGuess.Length == 0)
         {
             thetaGuess = (float[])thetaList.Clone();
         }
 
-        // good
+        // Tsb = myFKinSpace(M,Slist, thetalist)
         OutFrameSB = Kinematics.fkInSpace(m, omegaList, vList, thetaGuess);
 
-        // good
-        float4x4 T_bs = Kinematics.TransInverse(OutFrameSB);
+        // Tbs = mr.TransInv(Tsb)
+        OutFrameBS = Kinematics.TransInverse(OutFrameSB);
 
-        //good
-        OutFrameBD = math.mul(T_bs, target);
+        // Tbd = np.dot(Tbs, T)
+        OutFrameBD = math.mul(OutFrameBS, target);
 
-        //!
-        Matrix<float> V = Kinematics.TransMatrixLog(OutFrameBD);
-        OutV = V.ToString();
+        // Vbd = mr.se3ToVec(mr.MatrixLog6(Tbd))
+        Matrix<float> Vbd = Kinematics.TransMatrixLog(OutFrameBD);
+        OutVbd = Vbd.ToString();
 
-        Vector<float> omega = V.Column(0).SubVector(0, 3);
-        Vector<float> v = V.Column(0).SubVector(3, 3);
+        // Vs = np.dot(mr.Adjoint(Tsb), Vbd)
+        Matrix<float> AdjVsb = Kinematics.Adjoint(OutFrameSB);
+        OutAdjVsb = AdjVsb.ToString();
 
-        // Error of ||V.w|| and ||V.v|| 
-        currentOmegaError = omega.L2Norm();
-        currentVError = v.L2Norm();
+        Matrix<float> Vs = AdjVsb.Multiply(Vbd);
+        OutVs = Vs.ToString();
+    }
 
-        Matrix<float> jacobian = Kinematics.SpaceJacobian(thetaGuess, omegaList, vList);
-        OutJacobian = jacobian.ToString();
+    void IKStep()
+    {
+        // if (thetaGuess == null || thetaGuess.Length == 0)
+        // {
+        //     thetaGuess = (float[])thetaList.Clone();
+        // }
 
-        Matrix<float> jacobianInverse = jacobian.PseudoInverse();
+        // // good
+        // OutFrameSB = Kinematics.fkInSpace(m, omegaList, vList, thetaGuess);
 
-        // Next Guess
-        // thetaList + jacobian * V
-        Vector<float> thetaVector = Vector<float>.Build.DenseOfArray(thetaGuess);
-        var result = jacobianInverse.Multiply(V);
+        // // good
+        // float4x4 T_bs = Kinematics.TransInverse(OutFrameSB);
 
-        thetaGuess = (thetaVector + result.Column(0)).AsArray();
+        // //good
+        // OutFrameBD = math.mul(T_bs, target);
 
+        // //!
+        // Matrix<float> V = Kinematics.TransMatrixLog(OutFrameBD);
+        // OutV = V.ToString();
 
+        // Vector<float> omega = V.Column(0).SubVector(0, 3);
+        // Vector<float> v = V.Column(0).SubVector(3, 3);
+
+        // // Error of ||V.w|| and ||V.v|| 
+        // currentOmegaError = omega.L2Norm();
+        // currentVError = v.L2Norm();
+
+        // Matrix<float> jacobian = Kinematics.SpaceJacobian(thetaGuess, omegaList, vList);
+        // OutJacobian = jacobian.ToString();
+
+        // Matrix<float> jacobianInverse = jacobian.PseudoInverse();
+
+        // // Next Guess
+        // // thetaList + jacobian * V
+        // Vector<float> thetaVector = Vector<float>.Build.DenseOfArray(thetaGuess);
+        // var result = jacobianInverse.Multiply(V);
+
+        // thetaGuess = (thetaVector + result.Column(0)).AsArray();
     }
 
     void OnDrawGizmos()
@@ -82,7 +111,7 @@ public class NIKTester : MonoBehaviour
         {
             firstStep = false;
             thetaGuess = (float[])thetaList.Clone();
-            IKStep();
+            IKCalcValues();
         }
 
         if (simulate)
