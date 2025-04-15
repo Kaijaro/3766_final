@@ -14,6 +14,7 @@ public class NumericalIK : MonoBehaviour
     [SerializeField] double currentVError;
     [SerializeField] bool step = false;
     [SerializeField] bool reset = false;
+    [SerializeField] bool ApplyRotations = false;
 
     Matrix<float> JacobianStep;
     float[] thetaGuess;
@@ -52,9 +53,12 @@ public class NumericalIK : MonoBehaviour
         while ((i++ < 20) && (currentOmegaError > errorOmega || currentVError > errorV))
         {
             Vector<float> thetaVector = Vector<float>.Build.DenseOfArray(thetaGuess);
+
             thetaGuess = (thetaVector + JacobianStep.Column(0)).AsArray();
             NextValues();
         }
+
+
 
         return thetaGuess;
     }
@@ -63,13 +67,18 @@ public class NumericalIK : MonoBehaviour
     {
         if (reset)
         {
-            reset = false;
+
             thetaGuess = config.ThetaList;
+            config.ResetRotations();
         }
         if (step)
         {
             float[] guess = IK();
 
+        }
+        if (ApplyRotations)
+        {
+            config.ApplyRotations(thetaGuess);
         }
         config.DisplayConfig(thetaGuess);
 

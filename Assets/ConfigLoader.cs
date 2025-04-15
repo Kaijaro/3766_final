@@ -22,12 +22,6 @@ public class ConfigLoader : MonoBehaviour
     [SerializeField] float4x4 m;
     public float4x4 M { get { return m; } }
 
-    [SerializeField] string jres = "a\nb";
-
-    Matrix<float> jacobian;
-
-
-
     public void ProcessJoints()
     {
         m = Kinematics.CreateTransform(float3x3.identity, float3.zero);
@@ -39,12 +33,15 @@ public class ConfigLoader : MonoBehaviour
         int i = 0;
         foreach (Transform joint in joints)
         {
+
             float3 translation = Kinematics.GetTranslation(m);
             float3x3 rotation = Kinematics.GetRotation(m);
 
-            translation.x += joint.localPosition.x;
-            translation.y += joint.localPosition.y;
-            translation.z += joint.localPosition.z;
+            Vector3 offset = i == 0 ? joint.position : joint.localPosition;
+
+            translation.x += offset.x;
+            translation.y += offset.y;
+            translation.z += offset.z;
 
             m = Kinematics.CreateTransform(rotation, translation);
             mList[i / 3] = new float4x4(m);
@@ -72,54 +69,88 @@ public class ConfigLoader : MonoBehaviour
 
     void OnDrawGizmos()
     {
-        // if (update)
-        // {
-        //     update = false;
-        //     ProcessJoints();
-        // }
-        ProcessJoints();
-
+        if (update)
+        {
+            update = false;
+            ProcessJoints();
+        }
 
     }
 
+    public void ApplyRotations(float[] rotations)
+    {
+        for (int i = 0; i < rotations.Length / 3; i++)
+        {
 
+            Transform joint = joints[i];
+            float rotY = math.degrees(rotations[i * 3]);
+            float rotX = math.degrees(rotations[i * 3 + 1]);
+            float rotZ = math.degrees(rotations[i * 3 + 2]);
+
+            if (i == 0)
+            {
+                joint.eulerAngles = new Vector3(rotX, rotY, rotZ);
+            }
+            else
+            {
+                joint.localEulerAngles = new Vector3(rotX, rotY, rotZ);
+            }
+
+        }
+    }
+
+    public void ResetRotations()
+    {
+        for (int i = 0; i < thetaList.Length / 3; i++)
+        {
+
+            Transform joint = joints[i];
+            float rotY = math.degrees(thetaList[i * 3]);
+            float rotX = math.degrees(thetaList[i * 3 + 1]);
+            float rotZ = math.degrees(thetaList[i * 3 + 2]);
+
+            joint.localEulerAngles = new Vector3(rotX, rotY, rotZ);
+        }
+    }
+
+    private float4x4 CalcFrame(float[] thetaList, int jointIndex)
+    {
+        float4x4 frame = float4x4.identity;
+
+        for (int j = 0; j <= jointIndex; j++)
+        {
+            try
+            {
+                float4x4 expY = Kinematics.JointV(omegaList[j * 3], vList[j * 3], thetaList[j * 3]);
+                float4x4 expX = Kinematics.JointV(omegaList[j * 3 + 1], vList[j * 3 + 1], thetaList[j * 3 + 1]);
+                float4x4 expZ = Kinematics.JointV(omegaList[j * 3 + 2], vList[j * 3 + 2], thetaList[j * 3 + 2]);
+                frame = math.mul(frame, expY);
+                frame = math.mul(frame, expX);
+                frame = math.mul(frame, expZ);
+            }
+            catch (System.Exception)
+            {
+                Debug.Log(j);
+                throw;
+            }
+        }
+
+        return math.mul(frame, mList[jointIndex]); ;
+    }
 
     public void DisplayConfig(float[] thetaList)
     {
         for (int i = 0; i < mList.Length; i++)
         {
-            float4x4 config = float4x4.identity;
-
-            for (int j = 0; j <= i; j++)
-            {
-                float4x4 expY = Kinematics.JointV(omegaList[j * 3], vList[j * 3], thetaList[j * 3]);
-                float4x4 expX = Kinematics.JointV(omegaList[j * 3 + 1], vList[j * 3 + 1], thetaList[j * 3 + 1]);
-                float4x4 expZ = Kinematics.JointV(omegaList[j * 3 + 2], vList[j * 3 + 2], thetaList[j * 3 + 2]);
-                config = math.mul(config, expY);
-                config = math.mul(config, expX);
-                config = math.mul(config, expZ);
-
-            }
-
-            config = math.mul(config, mList[i]);
+            float4x4 config = CalcFrame(thetaList, i);
             Vector3 pos = Kinematics.ToVector(Kinematics.GetTranslation(config));
 
             if (i > 0)
             {
-                float4x4 lastPosConfig = float4x4.identity;
-
-                for (int j = 0; j <= i - 1; j++)
-                {
-                    float4x4 expY = Kinematics.JointV(omegaList[j * 3], vList[j * 3], thetaList[j * 3]);
-                    float4x4 expX = Kinematics.JointV(omegaList[j * 3 + 1], vList[j * 3 + 1], thetaList[j * 3 + 1]);
-                    float4x4 expZ = Kinematics.JointV(omegaList[j * 3 + 2], vList[j * 3 + 2], thetaList[j * 3 + 2]);
-                    lastPosConfig = math.mul(lastPosConfig, expY);
-                    lastPosConfig = math.mul(lastPosConfig, expX);
-                    lastPosConfig = math.mul(lastPosConfig, expZ);
-                }
+                float4x4 lastPosConfig = CalcFrame(thetaList, i - 1);
 
                 Gizmos.color = Color.HSVToRGB((i - 1f) / (mList.Length - 1f), .35f, 1f);
-                Vector3 lastPos = Kinematics.ToVector(Kinematics.GetTranslation(math.mul(lastPosConfig, mList[i - 1])));
+                Vector3 lastPos = Kinematics.ToVector(Kinematics.GetTranslation(lastPosConfig));
 
                 Gizmos.DrawLine(lastPos, pos);
             }

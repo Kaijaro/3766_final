@@ -260,12 +260,12 @@ class Kinematics
 
     public static bool NearZero(float f)
     {
-        return f < 0.001 && f > -0.001;
+        return math.abs(f) < 0.01f;
     }
 
     public static bool NearZero(float3 vec3)
     {
-        return GetMagnitude(vec3) < 0.001;
+        return GetMagnitude(vec3) < 0.01f;
     }
 
     public static bool NearIdentity(float3x3 mat3)
