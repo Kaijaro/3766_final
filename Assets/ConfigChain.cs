@@ -2,6 +2,9 @@ using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
 
+/**
+    Final not in use. First attempt at implimenting config
+*/
 public class ConfigChain : MonoBehaviour
 {
     [SerializeField] Revolute[] joints;

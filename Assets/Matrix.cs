@@ -4,6 +4,11 @@ using UnityEditor.Rendering;
 using UnityEngine;
 using Unity.Mathematics;
 
+/**
+    File not in use
+
+    It was most feasible to use an already existing matrix class than to create our own.
+*/
 [Serializable]
 public class Matrix
 {

@@ -7,6 +7,9 @@ using MathNet.Numerics.LinearAlgebra;
 using System;
 using MathNet.Numerics.Random;
 
+/**
+    Implements generic kinematic operations found in the modern robotics book.
+*/
 class Kinematics
 {
 

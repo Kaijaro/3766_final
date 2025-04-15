@@ -3,6 +3,9 @@ using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
 
+/**
+    File not in use for final product. Used to debug calculations
+*/
 public class NIKTester : MonoBehaviour
 {
     [Header("Input Values")]

@@ -6,6 +6,11 @@ using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 using System.Collections.Generic;
 
+/**
+    The config loader finds the twist postion for the NumericalIK.cs script.
+
+    Allows for the potential to apply those rotations, visualize the configured forward kinematics, and reset back to the original rotations
+*/
 public class ConfigLoader : MonoBehaviour
 {
     [SerializeField] Transform[] joints;

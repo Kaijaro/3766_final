@@ -1,6 +1,8 @@
 using Unity.Mathematics;
 using UnityEngine;
-
+/**
+    Final not in use. 
+*/
 public class MatrixTesting : MonoBehaviour
 {
     [Header("Input")]
@@ -26,9 +28,9 @@ public class MatrixTesting : MonoBehaviour
         if (update)
         {
             update = false;
-            result = new Matrix(4,3);
+            result = new Matrix(4, 3);
             result.fill(1f);
-            B = new Matrix(3,2);
+            B = new Matrix(3, 2);
             B.fill(2f);
             result = result.MatMul(B);
 

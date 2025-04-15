@@ -3,6 +3,9 @@ using System;
 using Unity.Mathematics;
 using UnityEngine;
 
+/**
+    File not in use, First attempt at representing joints
+*/
 [Serializable]
 public class Revolute : MonoBehaviour
 {

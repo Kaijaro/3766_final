@@ -1,6 +1,8 @@
 using Unity.Mathematics;
 using UnityEngine;
-
+/**
+    Final not in use. 
+*/
 public class KinematicsTesting : MonoBehaviour
 {
     [Header("Input")]

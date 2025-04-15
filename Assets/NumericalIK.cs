@@ -3,6 +3,9 @@ using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
 
+/**
+    Used to solve the numerical inverse kinematics. Makes reference to the config in ConfigLoader.cs and methods avalible in Kinematics.cs
+*/
 public class NumericalIK : MonoBehaviour
 {
     [SerializeField] ConfigLoader config;
@@ -19,6 +22,9 @@ public class NumericalIK : MonoBehaviour
     Matrix<float> JacobianStep;
     float[] thetaGuess;
 
+    /**
+    Generates the values for solving numerical IK in the space frame
+    */
     void NextValues()
     {
         if (thetaGuess == null || thetaGuess.Length == 0)
@@ -45,6 +51,9 @@ public class NumericalIK : MonoBehaviour
         currentVError = v.L2Norm();
     }
 
+    /**
+    Continues applying each step until either it reaches over 20 steps or the error threshold has been reached.
+    */
     float[] IK()
     {
         NextValues();
@@ -58,11 +67,12 @@ public class NumericalIK : MonoBehaviour
             NextValues();
         }
 
-
-
         return thetaGuess;
     }
 
+    /**
+        Allows for control during edit mode. 
+    */
     void OnDrawGizmos()
     {
         if (reset)
